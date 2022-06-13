@@ -13,13 +13,14 @@ const manufacturerController = {
         .exec((err,manufacturer)=>res.json(manufacturer));
     },
     create(req,res){
+        console.log("提示","调用create");
         const requestBody = req.body;
         const newManufacturer = new Manufacturer(requestBody);
+        console.log("提示",requestBody);
 
         newManufacturer.save((err,saved)=>{
-            Manufacturer
-            .findOne({_id:newManufacturer._id})
-            .exec((err,manufacturer)=>res.json(manufacturer));
+            if(err) throw err;
+            res.json(saved);
         })
     },
     update(req,res){
@@ -32,8 +33,10 @@ const manufacturerController = {
     },
     remove(req,res){
         const idParams = req.params.id;
-
-        Manufacturer.findOne({_id:idParams}).remove((err,removed)=>res.json(idParams))
+        Manufacturer.remove({_id:idParams},(err)=>{
+            if(err) throw err;
+            res.json(idParams);
+        })
     }
 }
 
@@ -46,10 +49,12 @@ module.exports = manufacturerController;    //导出控制器
 // remove 用于删除单个制造商
 
 // 这里有一个疑问？？ 为什么Manufacturer模型的ID属性要用'_id'，明明定义Model的时候定义的是'id'，这会不会造成一些错误bug
-// 自己推测：应该是前面教程定义的时候错乱，_id下划线应该表示的是私有属性。
+// 自己推测：应该是前面教程定义的时候错乱，_id下划线应该表示的是私有属性。所以做出修改：将Model中的id改为_id
+// 实践结果：改为_id之后，使用Postman报错，因为如果使用_id的话，需要在初始化的时候定义这个属性，否则会出错
 
 //一些改进
 // create()部分，
 // newManufacturer.save((err,saved)=>res.json(saved))
-// removeb()部分，
+// remove()部分，
 // Manufacturer.remove({_id:idParams}), (err)=>res.json(idParams))
+// 经过实践测试，create的改进是有效的。
